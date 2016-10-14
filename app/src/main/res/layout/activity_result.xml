@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activities.ResultActivity">
+
+    <TextView
+        android:id="@+id/weAreSorryTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/noFoundPic"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="64dp"
+        android:text="Lo sentimos."
+        android:textSize="30sp"
+        android:visibility="gone" />
+
+    <ImageView
+        android:id="@+id/noFoundPic"
+        android:layout_width="100sp"
+        android:layout_height="100sp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:src="@drawable/forma_17"
+        android:visibility="gone" />
+
+    <TextView
+        android:id="@+id/noDataAvailableTV"
+        android:layout_width="300sp"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/noFoundPic"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="49dp"
+        android:text="No hay datos disponibles para este barril."
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/emptyFillBtn">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/goldenAlePic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20sp"
+                android:src="@drawable/golden_ale" />
+
+            <TextView
+                android:id="@+id/beerType"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/goldenAlePic"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10sp"
+                android:text="Patagonia Golden Ale"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/beerMoreData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/beerType"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10sp"
+                android:text="ver más datos"
+                android:textColor="#269c9b" />
+
+            <TextView
+                android:id="@+id/beerTemperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/beerMoreData"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20sp"
+                android:text="12º"
+                android:textSize="35sp" />
+
+            <TextView
+                android:id="@+id/updateTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/beerTemperature"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5sp"
+                android:text="Actualizado:" />
+
+            <TextView
+                android:id="@+id/lastUpdate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/updateTV"
+                android:layout_centerHorizontal="true"
+                android:text="22/10/2016 - 16:06 hs." />
+
+            <TextView
+                android:id="@+id/tempertureMoreData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/lastUpdate"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10sp"
+                android:text="ver historial de temperatura"
+                android:textColor="#269c9b" />
+
+            <TextView
+                android:id="@+id/ownerName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/tempertureMoreData"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20sp"
+                android:text="Cerveceria Barba Roja"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/ownerMoreData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ownerName"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10sp"
+                android:text="ver más datos"
+                android:textColor="#269c9b" />
+
+            <TextView
+                android:id="@+id/beerSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ownerMoreData"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20sp"
+                android:text="50 lts"
+                android:textSize="35sp" />
+
+            <TextView
+                android:id="@+id/barrelnumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/beerSize"
+                android:layout_centerHorizontal="true"
+                android:text="Barril: 4" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/barrelState"
+                android:layout_below="@id/barrelnumber"
+                android:layout_centerHorizontal="true"
+                android:text="Estado Actual: lleno" />
+
+
+        </RelativeLayout>
+    </ScrollView>
+
+    <Button
+        android:id="@+id/emptyFillBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20sp"
+        android:background="@drawable/vaciarbarril"
+        android:paddingLeft="50sp"
+        android:paddingRight="50sp"
+        android:layout_marginTop="10sp"
+        android:text="Vaciar barril"
+        android:textColor="#fff" />
+
+
+</RelativeLayout>
