@@ -60,6 +60,7 @@ public class NfcActivity extends AppCompatActivity
         setContentView(R.layout.activity_nfc);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
+        showTagReadImage(false);
         AppPreferences.instance(getApplication()).saveSessionOpen(true);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -67,6 +68,14 @@ public class NfcActivity extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
+        TextView acerqueDisp = (TextView) findViewById(R.id.putDeviceNearTV);
+        assert acerqueDisp != null;
+        acerqueDisp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sinNfc();
+            }
+        });
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -79,6 +88,48 @@ public class NfcActivity extends AppCompatActivity
         username.setText(AppPreferences.instance(getApplication()).getUsername());
         TextView usermail = (TextView) headerView.findViewById(R.id.bussinessEmail);
         usermail.setText(AppPreferences.instance(getApplication()).getUserEmail());
+
+    }
+
+    private void sinNfc() {
+        showTagReadImage(true);
+
+        OkHttpClient client = new OkHttpClient();
+
+        String url = "http://betrack.herokuapp.com/barrels/"+2+".json";
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                e.printStackTrace();
+
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.code()>=400 && response.code()<=500) {
+                    Intent i = new Intent(NfcActivity.this, ResultActivity.class);
+                    AppPreferences.instance(getApplication()).saveBarrelFound(false);
+                    startActivity(i);
+                    Log.e("Response code: ", response.code() + " " + response.body().toString());
+                    throw new IOException("Unexpected code " + response);
+
+                } else {
+                    String jsonData = response.body().string();
+                    AppPreferences.instance(getApplication()).saveBarrelInfo(jsonData);
+                    Intent i = new Intent(NfcActivity.this, ResultActivity.class);
+                    i.putExtra("BarrelId",2);
+                    AppPreferences.instance(getApplication()).saveBarrelFound(true);
+                    startActivity(i);
+
+                }
+            }
+
+        });
 
     }
 
@@ -158,21 +209,17 @@ public class NfcActivity extends AppCompatActivity
                             @Override
                             public void onResponse(Response response) throws IOException {
                                 if (response.code()>=400 && response.code()<=500) {
-                                  //  Intent i = new Intent(NfcActivity.this, ResultActivity.class);
-                                  //  i.putExtra("Found", false);
-                                    showTagReadImage(true);
-                                    //startActivity(i);
+                                    Intent i = new Intent(NfcActivity.this, ResultActivity.class);
+                                    AppPreferences.instance(getApplication()).saveBarrelFound(false);
+                                    startActivity(i);
                                     Log.e("Response code: ", response.code() + " " + response.body().toString());
                                     throw new IOException("Unexpected code " + response);
 
                                 } else {
-                                    Gson gson = new Gson();
                                     String jsonData = response.body().string();
-                                    BarrelInformationPojo barrelInformationPojo = gson.fromJson(jsonData, BarrelInformationPojo.class);
-                                    Log.e("Barrel information",barrelInformationPojo.getBarreldata().getComments());
+                                    AppPreferences.instance(getApplication()).saveBarrelInfo(jsonData);
                                     Intent i = new Intent(NfcActivity.this, ResultActivity.class);
-                                    i.putExtra("Found",true);
-                                    i.putExtra("BarrelData", jsonData);
+                                    AppPreferences.instance(getApplication()).saveBarrelFound(true);
                                     i.putExtra("BarrelId",id);
                                     startActivity(i);
 

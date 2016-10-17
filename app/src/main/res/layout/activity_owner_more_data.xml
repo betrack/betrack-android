@@ -12,7 +12,7 @@
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/logo_cerveceria"
+        android:src="@drawable/bewery"
         android:id="@+id/ownerlogo"
         android:layout_centerHorizontal="true"/>
 
@@ -63,6 +63,8 @@
         android:background="@drawable/vaciarbarril"
         android:text="info@barbaroja.com"
         android:textColor="#fff"
+        android:paddingLeft="5sp"
+        android:paddingRight="5sp"
         android:layout_below="@id/ownerAddress"
         android:layout_marginTop="30sp"
         android:layout_centerHorizontal="true"/>

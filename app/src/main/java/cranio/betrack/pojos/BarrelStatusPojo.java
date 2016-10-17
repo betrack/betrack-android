@@ -9,7 +9,7 @@ public class BarrelStatusPojo {
     private float temperature;
     private String sent_at;
 
-    public BarrelStatusPojo (int id, float temperature, float temperature_tstmp, String state, int barrelId, String createdAt, String updatedAt){
+    public BarrelStatusPojo (float temperature,String sent_at){
         this.setTemperature(temperature);
         this.setSent_at(sent_at);
     }

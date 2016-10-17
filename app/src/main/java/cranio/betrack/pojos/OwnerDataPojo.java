@@ -19,8 +19,11 @@ public class OwnerDataPojo {
     private String store_type;
     private String created_at;
     private String updated_at;
+    private String temperature;
+    private String mac_address;
+    private String address;
 
-    public OwnerDataPojo(int id, float latitud, float longitud, String name, String socialReason, String CUIT, String email, String phoneNumber, String lastHearbeat, String storeType, String createdAt, String updatedAt) {
+    public OwnerDataPojo(int id, float latitud, float longitud, String name, String socialReason, String CUIT, String email, String phoneNumber, String lastHearbeat, String storeType, String createdAt, String updatedAt,String temperature,String mac_address,String address) {
         this.setId(id);
         this.setLatitud(latitud);
         this.setLongitud(longitud);
@@ -33,6 +36,7 @@ public class OwnerDataPojo {
         this.setStoreType(storeType);
         this.setCreatedAt(createdAt);
         this.setUpdatedAt(updatedAt);
+
     }
 
     public int getId() {
@@ -129,5 +133,29 @@ public class OwnerDataPojo {
 
     public void setUpdatedAt(String updatedAt) {
         this.updated_at = updatedAt;
+    }
+
+    public String getTemperature() {
+        return temperature;
+    }
+
+    public void setTemperature(String temperature) {
+        this.temperature = temperature;
+    }
+
+    public String getMac_address() {
+        return mac_address;
+    }
+
+    public void setMac_address(String mac_address) {
+        this.mac_address = mac_address;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

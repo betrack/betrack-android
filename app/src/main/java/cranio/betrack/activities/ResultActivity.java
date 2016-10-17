@@ -3,6 +3,7 @@ package cranio.betrack.activities;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.os.Looper;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,6 +38,9 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
     private String jsonStatus;
     private int id;
     private String jsonData;
+    private TextView barrelStatus;
+    private boolean found;
+    private boolean update;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,33 +48,50 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         setContentView(R.layout.activity_result);
 
         emptyFillBtn = (Button) findViewById(R.id.emptyFillBtn);
-        TextView showMoreBeerData =(TextView) findViewById(R.id.beerMoreData);
+        TextView showMoreBeerData = (TextView) findViewById(R.id.beerMoreData);
         TextView showMoreOwnerData = (TextView) findViewById(R.id.ownerMoreData);
+        TextView showMoreTemperatureData = (TextView) findViewById(R.id.tempertureMoreData);
         if (getIntent().getExtras() != null) {
-            showAssets(getIntent().getBooleanExtra("Found", false));
             id = getIntent().getIntExtra("BarrelId", 1);
-            jsonData = getIntent().getStringExtra("BarrelData");
-
+            update = getIntent().getBooleanExtra("Update", false);
         }
 
-        showBarrelData();
-        assert emptyFillBtn != null;
-        Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/betrackfont.ttf");
-        emptyFillBtn.setTypeface(typeface);
-        if (AppPreferences.instance(getApplication()).getUsername().equals("Bar")) {
-            emptyFillBtn.setText("Vaciar Barril");
-            jsonStatus = "{barrel_status:{state:'empty'}}";
-        } else {
-            emptyFillBtn.setText("Llenar Barril");
-            jsonStatus = "{barrel_status:{state:'full'}}";
+        barrelStatus = (TextView) findViewById(R.id.barrelState);
+        assert barrelStatus != null;
+
+        if (update){
+            if(AppPreferences.instance(getApplication()).getUsername().equals("Bar")){
+                barrelStatus.setText("Estado Actual: Vacío");
+            }else{
+                barrelStatus.setText("Estado Actual: Lleno");
+            }
         }
 
-        emptyFillBtn.setOnClickListener(this);
-        assert showMoreBeerData != null;
-        showMoreBeerData.setOnClickListener(this);
-        assert showMoreOwnerData != null;
-        showMoreOwnerData.setOnClickListener(this);
+        found = AppPreferences.instance(getApplication()).getBarrelFound();
+        showAssets(found);
 
+        if (found) {
+            jsonData = AppPreferences.instance(getApplication()).getBarrelInfo();
+            showBarrelData();
+            assert emptyFillBtn != null;
+            Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/betrackfont.ttf");
+            emptyFillBtn.setTypeface(typeface);
+            if (AppPreferences.instance(getApplication()).getUsername().equals("Bar")) {
+                emptyFillBtn.setText("Vaciar Barril");
+                jsonStatus = "{barrel_status:{state:'empty'}}";
+            } else {
+                emptyFillBtn.setText("Llenar Barril");
+                jsonStatus = "{barrel_status:{state:'full'}}";
+            }
+
+            emptyFillBtn.setOnClickListener(this);
+            assert showMoreBeerData != null;
+            showMoreBeerData.setOnClickListener(this);
+            assert showMoreOwnerData != null;
+            showMoreOwnerData.setOnClickListener(this);
+            assert showMoreTemperatureData != null;
+            showMoreTemperatureData.setOnClickListener(this);
+        }
 
     }
 
@@ -86,12 +107,15 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         TextView beerTemperature = (TextView) findViewById(R.id.beerTemperature);
         assert beerTemperature != null;
         if (barrelInformationPojo.getBarrelStatus().size() > 0) {
-            beerTemperature.setText(barrelInformationPojo.getBarrelStatus().get(barrelInformationPojo.getBarrelStatus().size()).getTemperature() + "º");
+            beerTemperature.setText(barrelInformationPojo.getBarreldata().getLast_temperature() + "º");
         }
 
         TextView temperatureUpdate = (TextView) findViewById(R.id.lastUpdate);
         assert temperatureUpdate != null;
         if (barrelInformationPojo.getBarrelStatus().size() > 0) {
+            String lastUpdate = barrelInformationPojo.getBarrelStatus().get(barrelInformationPojo.getBarrelStatus().size() - 1).getSent_at();
+            String parts[] = lastUpdate.split("T");
+            temperatureUpdate.setText(parts[0]);
         }
 
         TextView ownerName = (TextView) findViewById(R.id.ownerName);
@@ -100,11 +124,18 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
 
         TextView beerSize = (TextView) findViewById(R.id.beerSize);
         assert beerSize != null;
-        beerSize.setText(barrelInformationPojo.getBarreldata().getContent()+"lts");
+        beerSize.setText(barrelInformationPojo.getBarreldata().getContent() + "lts");
 
         TextView barrelNumber = (TextView) findViewById(R.id.barrelnumber);
         assert barrelNumber != null;
-        barrelNumber.setText("Barril: "+barrelInformationPojo.getBarreldata().getNumber());
+        barrelNumber.setText("Barril: " + barrelInformationPojo.getBarreldata().getNumber());
+
+
+        if (barrelInformationPojo.getBarreldata().getLast_state().equals("empty")) {
+            barrelStatus.setText("Estado Actual: Vacio");
+        }else{
+            barrelStatus.setText("Estado Actual: Lleno");
+        }
 
 
     }
@@ -134,15 +165,16 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
                 @Override
                 public void onResponse(Response response) throws IOException {
                     if (response.code() >= 400 && response.code() <= 500) {
-                        Toast.makeText(ResultActivity.this,"No se pudo realizar la acción. Inténtelo nuevamente.",Toast.LENGTH_LONG).show();
                         Log.e("Response code: ", response.code() + " " + response.body().toString());
                         throw new IOException("Unexpected code " + response);
 
                     } else {
-                        Toast.makeText(ResultActivity.this,"Acción realizada exitosamente",Toast.LENGTH_LONG).show();
-                        Intent i = new Intent(ResultActivity.this, NfcActivity.class);
-                        startActivity(i);
                         Log.e("Response code: ", response.code() + " " + response.body().toString());
+                        updateBarrelData();
+                        Intent i = new Intent(ResultActivity.this, NfcActivity.class);
+                        i.putExtra("Update",true);
+                        startActivity(i);
+
 
                     }
                 }
@@ -153,10 +185,56 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    private void updateBarrelData() {
+        OkHttpClient client = new OkHttpClient();
+
+        String url = "http://betrack.herokuapp.com/barrels/" + id + ".json";
+
+        Request request = new Request.Builder()
+                .url(url)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Request request, IOException e) {
+                e.printStackTrace();
+
+            }
+
+            @Override
+            public void onResponse(Response response) throws IOException {
+                if (response.code() >= 400 && response.code() <= 500) {
+                    Log.e("Response code: ", response.code() + " " + response.body().toString());
+                    throw new IOException("Unexpected code " + response);
+
+                } else {
+                    String jsonData = response.body().string();
+                    AppPreferences.instance(getApplication()).saveBarrelInfo(jsonData);
+                }
+            }
+
+        });
+
+
+    }
+
     private void showAssets(boolean found) {
         TextView weAreSorry = (TextView) findViewById(R.id.weAreSorryTV);
         TextView noDataFound = (TextView) findViewById(R.id.noDataAvailableTV);
         ImageView noFoundPic = (ImageView) findViewById(R.id.noFoundPic);
+        TextView beertype = (TextView) findViewById(R.id.beerType);
+        TextView beerTemperature = (TextView) findViewById(R.id.beerTemperature);
+        TextView temperatureUpdate = (TextView) findViewById(R.id.lastUpdate);
+        TextView ownerName = (TextView) findViewById(R.id.ownerName);
+        TextView beerSize = (TextView) findViewById(R.id.beerSize);
+        TextView barrelNumber = (TextView) findViewById(R.id.barrelnumber);
+        barrelStatus = (TextView) findViewById(R.id.barrelState);
+        ImageView goldenAlePic = (ImageView) findViewById(R.id.goldenAlePic);
+        TextView beerMoreData = (TextView) findViewById(R.id.beerMoreData);
+        TextView updateTV = (TextView) findViewById(R.id.updateTV);
+        TextView temperatureMoreData = (TextView) findViewById(R.id.tempertureMoreData);
+        ImageView ownerPic = (ImageView) findViewById(R.id.ownerPic);
+        TextView ownerMoreData = (TextView) findViewById(R.id.ownerMoreData);
 
         assert weAreSorry != null;
         weAreSorry.setVisibility(found ? View.INVISIBLE : View.VISIBLE);
@@ -165,6 +243,32 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         assert noFoundPic != null;
         noFoundPic.setVisibility(found ? View.INVISIBLE : View.VISIBLE);
         emptyFillBtn.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert beertype != null;
+        beertype.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert beerTemperature != null;
+        beerTemperature.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert temperatureUpdate != null;
+        temperatureUpdate.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert ownerName != null;
+        ownerName.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert beerSize != null;
+        beerSize.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert barrelNumber != null;
+        barrelNumber.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert goldenAlePic != null;
+        goldenAlePic.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert beerMoreData != null;
+        beerMoreData.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert updateTV != null;
+        updateTV.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert temperatureMoreData != null;
+        temperatureMoreData.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert ownerPic != null;
+        ownerPic.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+        assert ownerMoreData != null;
+        ownerMoreData.setVisibility(found ? View.VISIBLE : View.INVISIBLE);
+
+
     }
 
     @Override
@@ -174,18 +278,23 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        Intent i;
+        switch (v.getId()) {
             case R.id.emptyFillBtn:
                 postNewStatus();
                 break;
             case R.id.beerMoreData:
-                Intent i = new Intent(ResultActivity.this,BeerMoreDataActivity.class);
+                i = new Intent(ResultActivity.this, BeerMoreDataActivity.class);
                 startActivity(i);
                 break;
             case R.id.ownerMoreData:
-                Intent in = new Intent(ResultActivity.this,OwnerMoreData.class);
-                startActivity(in);
+                i = new Intent(ResultActivity.this, OwnerMoreData.class);
+                startActivity(i);
                 break;
+
+            case R.id.tempertureMoreData:
+                i = new Intent(ResultActivity.this, TemperatureMoreDataActivity.class);
+                startActivity(i);
         }
 
     }
