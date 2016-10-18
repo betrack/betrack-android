@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
@@ -91,7 +92,20 @@ public class TemperatureMoreDataActivity extends AppCompatActivity {
 
         TextView beerTemperature = (TextView) findViewById(R.id.beerTemperatureMoreData);
         assert beerTemperature != null;
-        beerTemperature.setText(barrelInformationPojo.getBarreldata().getLast_temperature()+"º");
+        Float temperature = barrelInformationPojo.getBarreldata().getLast_temperature();
+        beerTemperature.setText(temperature+"º");
+        ImageView temperatureCircle = (ImageView)findViewById(R.id.temperatureCircle);
+        if(temperature<=5){
+            assert temperatureCircle != null;
+            temperatureCircle.setImageResource(R.drawable.ic_temperature_green);
+        }else if(temperature>5&&temperature<12){
+            assert temperatureCircle != null;
+            temperatureCircle.setImageResource(R.drawable.ic_temperature_yellow);
+        }else{
+            assert temperatureCircle != null;
+            temperatureCircle.setImageResource(R.drawable.ic_temperature_red);
+        }
+
 
         TextView lot = (TextView) findViewById(R.id.lotNumberTemperatureData);
         assert lot != null;

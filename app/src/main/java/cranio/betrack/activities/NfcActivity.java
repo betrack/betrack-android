@@ -9,43 +9,28 @@ import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Parcelable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
+import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.squareup.okhttp.Callback;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Date;
 
 import cranio.betrack.R;
-import cranio.betrack.pojos.BarrelInformationPojo;
-import cranio.betrack.pojos.BarrelPojo;
-import cranio.betrack.pojos.BarrelStatusPojo;
-import cranio.betrack.pojos.OwnerDataPojo;
-import cranio.betrack.pojos.OwnerPojo;
 import cranio.betrack.utils.AppPreferences;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -60,7 +45,7 @@ public class NfcActivity extends AppCompatActivity
         setContentView(R.layout.activity_nfc);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
 
-        showTagReadImage(false);
+
         AppPreferences.instance(getApplication()).saveSessionOpen(true);
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -96,7 +81,7 @@ public class NfcActivity extends AppCompatActivity
 
         OkHttpClient client = new OkHttpClient();
 
-        String url = "http://betrack.herokuapp.com/barrels/"+2+".json";
+        String url = "http://betrack.herokuapp.com/barrels/" + 2 + ".json";
 
         Request request = new Request.Builder()
                 .url(url)
@@ -111,7 +96,7 @@ public class NfcActivity extends AppCompatActivity
 
             @Override
             public void onResponse(Response response) throws IOException {
-                if (response.code()>=400 && response.code()<=500) {
+                if (response.code() >= 400 && response.code() <= 500) {
                     Intent i = new Intent(NfcActivity.this, ResultActivity.class);
                     AppPreferences.instance(getApplication()).saveBarrelFound(false);
                     startActivity(i);
@@ -122,7 +107,7 @@ public class NfcActivity extends AppCompatActivity
                     String jsonData = response.body().string();
                     AppPreferences.instance(getApplication()).saveBarrelInfo(jsonData);
                     Intent i = new Intent(NfcActivity.this, ResultActivity.class);
-                    i.putExtra("BarrelId",2);
+                    i.putExtra("BarrelId", 2);
                     AppPreferences.instance(getApplication()).saveBarrelFound(true);
                     startActivity(i);
 
@@ -142,8 +127,6 @@ public class NfcActivity extends AppCompatActivity
             super.onBackPressed();
         }
     }
-
-
 
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -168,6 +151,9 @@ public class NfcActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        if (AppPreferences.instance(getApplication()).getBarrelFound()) {
+            showTagReadImage(false);
+        }
         enableForegroundDispatchSystem();
     }
 
@@ -193,7 +179,7 @@ public class NfcActivity extends AppCompatActivity
                     if (id != null) {
                         OkHttpClient client = new OkHttpClient();
 
-                        String url = "http://betrack.herokuapp.com/barrels/"+id+".json";
+                        String url = "http://betrack.herokuapp.com/barrels/" + id + ".json";
 
                         Request request = new Request.Builder()
                                 .url(url)
@@ -208,7 +194,7 @@ public class NfcActivity extends AppCompatActivity
 
                             @Override
                             public void onResponse(Response response) throws IOException {
-                                if (response.code()>=400 && response.code()<=500) {
+                                if (response.code() >= 400 && response.code() <= 500) {
                                     Intent i = new Intent(NfcActivity.this, ResultActivity.class);
                                     AppPreferences.instance(getApplication()).saveBarrelFound(false);
                                     startActivity(i);
@@ -220,7 +206,7 @@ public class NfcActivity extends AppCompatActivity
                                     AppPreferences.instance(getApplication()).saveBarrelInfo(jsonData);
                                     Intent i = new Intent(NfcActivity.this, ResultActivity.class);
                                     AppPreferences.instance(getApplication()).saveBarrelFound(true);
-                                    i.putExtra("BarrelId",id);
+                                    i.putExtra("BarrelId", id);
                                     startActivity(i);
 
                                 }
@@ -248,15 +234,15 @@ public class NfcActivity extends AppCompatActivity
         TextView searchingDataTv = (TextView) findViewById(R.id.searchingForDataTV);
 
         assert tagTick != null;
-        tagTick.setVisibility(show? View.VISIBLE : View.GONE);
+        tagTick.setVisibility(show ? View.VISIBLE : View.GONE);
         assert detectedTv != null;
-        detectedTv.setVisibility(show? View.VISIBLE : View.GONE);
+        detectedTv.setVisibility(show ? View.VISIBLE : View.GONE);
         assert searchingDataTv != null;
-        searchingDataTv.setVisibility(show? View.VISIBLE : View.GONE);
+        searchingDataTv.setVisibility(show ? View.VISIBLE : View.GONE);
         assert searchTag != null;
-        searchTag.setVisibility(show? View.GONE : View.VISIBLE);
+        searchTag.setVisibility(show ? View.GONE : View.VISIBLE);
         assert putCloserTv != null;
-        putCloserTv.setVisibility(show? View.GONE : View.VISIBLE);
+        putCloserTv.setVisibility(show ? View.GONE : View.VISIBLE);
     }
 
     private String ByteArrayToHexString(byte[] byteArrayExtra) {

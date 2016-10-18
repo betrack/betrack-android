@@ -30,6 +30,7 @@ import java.io.IOException;
 import cranio.betrack.R;
 import cranio.betrack.pojos.BarrelInformationPojo;
 import cranio.betrack.utils.AppPreferences;
+import cranio.betrack.utils.PuntuationDialog;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class ResultActivity extends AppCompatActivity implements View.OnClickListener {
@@ -110,6 +111,21 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
             beerTemperature.setText(barrelInformationPojo.getBarreldata().getLast_temperature() + "º");
         }
 
+        Float temperature = barrelInformationPojo.getBarreldata().getLast_temperature();
+        beerTemperature.setText(temperature+"º");
+        ImageView temperatureCircle = (ImageView)findViewById(R.id.temperatureCircle);
+        if(temperature<=5){
+            assert temperatureCircle != null;
+            temperatureCircle.setImageResource(R.drawable.ic_temperature_green);
+        }else if(temperature>5&&temperature<12){
+            assert temperatureCircle != null;
+            temperatureCircle.setImageResource(R.drawable.ic_temperature_yellow);
+        }else{
+            assert temperatureCircle != null;
+            temperatureCircle.setImageResource(R.drawable.ic_temperature_red);
+        }
+
+
         TextView temperatureUpdate = (TextView) findViewById(R.id.lastUpdate);
         assert temperatureUpdate != null;
         if (barrelInformationPojo.getBarrelStatus().size() > 0) {
@@ -130,13 +146,14 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         assert barrelNumber != null;
         barrelNumber.setText("Barril: " + barrelInformationPojo.getBarreldata().getNumber());
 
+        if(barrelInformationPojo.getBarreldata().getLast_state()!=null) {
 
-        if (barrelInformationPojo.getBarreldata().getLast_state().equals("empty")) {
-            barrelStatus.setText("Estado Actual: Vacio");
-        }else{
-            barrelStatus.setText("Estado Actual: Lleno");
+            if (barrelInformationPojo.getBarreldata().getLast_state().equals("empty")) {
+                barrelStatus.setText("Estado Actual: Vacio");
+            } else {
+                barrelStatus.setText("Estado Actual: Lleno");
+            }
         }
-
 
     }
 
@@ -171,9 +188,7 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
                     } else {
                         Log.e("Response code: ", response.code() + " " + response.body().toString());
                         updateBarrelData();
-                        Intent i = new Intent(ResultActivity.this, NfcActivity.class);
-                        i.putExtra("Update",true);
-                        startActivity(i);
+
 
 
                     }
@@ -281,6 +296,8 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         Intent i;
         switch (v.getId()) {
             case R.id.emptyFillBtn:
+                PuntuationDialog puntuation = new PuntuationDialog(this);
+                puntuation.show();
                 postNewStatus();
                 break;
             case R.id.beerMoreData:
