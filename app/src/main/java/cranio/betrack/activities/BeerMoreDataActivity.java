@@ -43,7 +43,7 @@ public class BeerMoreDataActivity extends AppCompatActivity {
 
         TextView alcoholNumber = (TextView) findViewById(R.id.beerAlcoholNumber);
         assert alcoholNumber != null;
-        alcoholNumber.setText(""+barrelInformationPojo.getBarreldata().getAlcohol());
+        alcoholNumber.setText(""+barrelInformationPojo.getBarreldata().getAlcohol()+"%");
 
         TextView beerIBUnumber= (TextView) findViewById(R.id.beerIBUNumber);
         assert beerIBUnumber != null;

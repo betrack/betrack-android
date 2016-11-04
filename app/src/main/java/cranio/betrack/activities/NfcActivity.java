@@ -81,7 +81,7 @@ public class NfcActivity extends AppCompatActivity
 
         OkHttpClient client = new OkHttpClient();
 
-        String url = "http://betrack.herokuapp.com/barrels/" + 2 + ".json";
+        String url = "http://betrack.herokuapp.com/barrels/" + 4 + ".json";
 
         Request request = new Request.Builder()
                 .url(url)
@@ -107,7 +107,7 @@ public class NfcActivity extends AppCompatActivity
                     String jsonData = response.body().string();
                     AppPreferences.instance(getApplication()).saveBarrelInfo(jsonData);
                     Intent i = new Intent(NfcActivity.this, ResultActivity.class);
-                    i.putExtra("BarrelId", 2);
+                    i.putExtra("BarrelId", 4);
                     AppPreferences.instance(getApplication()).saveBarrelFound(true);
                     startActivity(i);
 
@@ -152,7 +152,7 @@ public class NfcActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         if (AppPreferences.instance(getApplication()).getBarrelFound()) {
-            showTagReadImage(false);
+            //showTagReadImage(false);
         }
         enableForegroundDispatchSystem();
     }
@@ -177,6 +177,7 @@ public class NfcActivity extends AppCompatActivity
                 if (parcelables != null && parcelables.length > 0) {
                     final String id = readTextFromMessage((NdefMessage) parcelables[0]);
                     if (id != null) {
+
                         OkHttpClient client = new OkHttpClient();
 
                         String url = "http://betrack.herokuapp.com/barrels/" + id + ".json";
@@ -206,7 +207,7 @@ public class NfcActivity extends AppCompatActivity
                                     AppPreferences.instance(getApplication()).saveBarrelInfo(jsonData);
                                     Intent i = new Intent(NfcActivity.this, ResultActivity.class);
                                     AppPreferences.instance(getApplication()).saveBarrelFound(true);
-                                    i.putExtra("BarrelId", id);
+                                    i.putExtra("BarrelId", Integer.parseInt(id));
                                     startActivity(i);
 
                                 }

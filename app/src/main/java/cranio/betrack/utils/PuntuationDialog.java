@@ -3,12 +3,14 @@ package cranio.betrack.utils;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import cranio.betrack.R;
 import cranio.betrack.activities.NfcActivity;
@@ -38,10 +40,18 @@ public class PuntuationDialog extends Dialog implements View.OnClickListener, Vi
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.custom_dialog);
+
+        TextView successTv = (TextView) findViewById(R.id.successTv);
+        Typeface typeface = Typeface.createFromAsset(getContext().getAssets(), "fonts/betrackfont.ttf");
+        successTv.setTypeface(typeface);
+
         sendBtn = (Button) findViewById(R.id.sendBtn);
         cancelBtn = (Button) findViewById(R.id.cancelBtn);
         sendBtn.setOnClickListener(this);
         cancelBtn.setOnClickListener(this);
+
+        sendBtn.setTypeface(typeface);
+        cancelBtn.setTypeface(typeface);
 
         star1 = (ImageView) findViewById(R.id.star1);
         star2 = (ImageView) findViewById(R.id.star2);
@@ -62,10 +72,10 @@ public class PuntuationDialog extends Dialog implements View.OnClickListener, Vi
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sendBtn:
-                dismiss();
+                c.finish();
                 break;
             case R.id.cancelBtn:
-                dismiss();
+                c.finish();
                 break;
             default:
                 break;
@@ -114,5 +124,8 @@ public class PuntuationDialog extends Dialog implements View.OnClickListener, Vi
         }
         return false;
     }
+
+
 }
+
 

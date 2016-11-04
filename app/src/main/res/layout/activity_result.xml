@@ -86,11 +86,10 @@
                 android:textSize="35sp" />
 
             <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="50sp"
+                android:layout_height="50sp"
                 android:src="@drawable/ic_temperature_yellow"
                 android:id="@+id/temperatureCircle"
-                android:layout_marginTop="10sp"
                 android:layout_alignTop="@+id/beerTemperature"
                 android:layout_toLeftOf="@+id/goldenAlePic"
                 android:layout_toStartOf="@+id/goldenAlePic" />

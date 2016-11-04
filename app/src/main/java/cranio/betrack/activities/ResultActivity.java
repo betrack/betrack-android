@@ -27,6 +27,8 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+import javax.xml.transform.Result;
+
 import cranio.betrack.R;
 import cranio.betrack.pojos.BarrelInformationPojo;
 import cranio.betrack.utils.AppPreferences;
@@ -60,10 +62,10 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         barrelStatus = (TextView) findViewById(R.id.barrelState);
         assert barrelStatus != null;
 
-        if (update){
-            if(AppPreferences.instance(getApplication()).getUsername().equals("Bar")){
+        if (update) {
+            if (AppPreferences.instance(getApplication()).getUsername().equals("Bar")) {
                 barrelStatus.setText("Estado Actual: Vacío");
-            }else{
+            } else {
                 barrelStatus.setText("Estado Actual: Lleno");
             }
         }
@@ -112,15 +114,15 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         }
 
         Float temperature = barrelInformationPojo.getBarreldata().getLast_temperature();
-        beerTemperature.setText(temperature+"º");
-        ImageView temperatureCircle = (ImageView)findViewById(R.id.temperatureCircle);
-        if(temperature<=5){
+        beerTemperature.setText(temperature + "º");
+        ImageView temperatureCircle = (ImageView) findViewById(R.id.temperatureCircle);
+        if (temperature <= 5) {
             assert temperatureCircle != null;
             temperatureCircle.setImageResource(R.drawable.ic_temperature_green);
-        }else if(temperature>5&&temperature<12){
+        } else if (temperature > 5 && temperature < 12) {
             assert temperatureCircle != null;
             temperatureCircle.setImageResource(R.drawable.ic_temperature_yellow);
-        }else{
+        } else {
             assert temperatureCircle != null;
             temperatureCircle.setImageResource(R.drawable.ic_temperature_red);
         }
@@ -146,7 +148,7 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         assert barrelNumber != null;
         barrelNumber.setText("Barril: " + barrelInformationPojo.getBarreldata().getNumber());
 
-        if(barrelInformationPojo.getBarreldata().getLast_state()!=null) {
+        if (barrelInformationPojo.getBarreldata().getLast_state() != null) {
 
             if (barrelInformationPojo.getBarreldata().getLast_state().equals("empty")) {
                 barrelStatus.setText("Estado Actual: Vacio");
@@ -158,9 +160,10 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
     }
 
 
-    private void postNewStatus() {
-        try {
+    private boolean postNewStatus() {
+        final boolean[] succes = {false};
 
+        try {
             JSONObject obj = new JSONObject(jsonStatus);
 
             MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -177,27 +180,52 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
                 @Override
                 public void onFailure(Request request, IOException e) {
                     e.printStackTrace();
+                    ResultActivity.this.runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(ResultActivity.this, "No se pudo actualizar el estado del barril. Compruebe su conexión a Internet.", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
                 }
 
                 @Override
                 public void onResponse(Response response) throws IOException {
                     if (response.code() >= 400 && response.code() <= 500) {
                         Log.e("Response code: ", response.code() + " " + response.body().toString());
+                        ResultActivity.this.runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(ResultActivity.this, "No se pudo actualizar el estado del barril", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
                         throw new IOException("Unexpected code " + response);
 
-                    } else {
+                    } else if (response.isSuccessful()) {
                         Log.e("Response code: ", response.code() + " " + response.body().toString());
                         updateBarrelData();
+                        ResultActivity.this.runOnUiThread(new Runnable() {
+                            public void run() {
+                                PuntuationDialog puntuation = new PuntuationDialog(ResultActivity.this);
+                                puntuation.show();
+                            }
+                        });
 
 
-
+                    }else {
+                        ResultActivity.this.runOnUiThread(new Runnable() {
+                            public void run() {
+                                Toast.makeText(ResultActivity.this, "No se pudo actualizar el estado del barril. Compruebe su conexión a internet", Toast.LENGTH_SHORT).show();
+                            }
+                        });
                     }
+
                 }
             });
 
         } catch (Throwable t) {
             Log.e("My App", "Could not parse malformed JSON: \"" + jsonStatus + "\"");
         }
+        return succes[0];
     }
 
     private void updateBarrelData() {
@@ -296,9 +324,8 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
         Intent i;
         switch (v.getId()) {
             case R.id.emptyFillBtn:
-                PuntuationDialog puntuation = new PuntuationDialog(this);
-                puntuation.show();
                 postNewStatus();
+
                 break;
             case R.id.beerMoreData:
                 i = new Intent(ResultActivity.this, BeerMoreDataActivity.class);
