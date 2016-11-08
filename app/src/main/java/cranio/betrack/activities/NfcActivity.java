@@ -151,16 +151,12 @@ public class NfcActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if (AppPreferences.instance(getApplication()).getBarrelFound()) {
-            //showTagReadImage(false);
-        }
         enableForegroundDispatchSystem();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
         disableForegroundDispatchSystem();
     }
 
@@ -169,7 +165,12 @@ public class NfcActivity extends AppCompatActivity
         super.onNewIntent(intent);
 
         if (intent.getAction().equals(NfcAdapter.ACTION_TAG_DISCOVERED)) {
-            showTagReadImage(true);
+            NfcActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    showTagReadImage(true);
+
+                }
+            });
 
             if (intent.hasExtra(NfcAdapter.EXTRA_TAG)) {
                 Parcelable[] parcelables = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);

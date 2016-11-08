@@ -1,15 +1,25 @@
 package cranio.betrack.activities;
 
+import android.annotation.TargetApi;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Typeface;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.os.Build;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -26,6 +36,7 @@ import com.squareup.okhttp.Response;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.transform.Result;
 
@@ -44,11 +55,15 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
     private TextView barrelStatus;
     private boolean found;
     private boolean update;
+    private NfcAdapter nfcAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
+
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
 
         emptyFillBtn = (Button) findViewById(R.id.emptyFillBtn);
         TextView showMoreBeerData = (TextView) findViewById(R.id.beerMoreData);
@@ -95,6 +110,116 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
             assert showMoreTemperatureData != null;
             showMoreTemperatureData.setOnClickListener(this);
         }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        enableForegroundDispatchSystem();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        disableForegroundDispatchSystem();
+    }
+
+    private void enableForegroundDispatchSystem() {
+
+        Intent intent = new Intent(this, ResultActivity.class).addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
+
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(NfcAdapter.ACTION_TAG_DISCOVERED);
+        filter.addAction(NfcAdapter.ACTION_NDEF_DISCOVERED);
+        filter.addAction(NfcAdapter.ACTION_TECH_DISCOVERED);
+
+        nfcAdapter.enableForegroundDispatch(this, pendingIntent, new IntentFilter[]{filter}, null);
+    }
+
+    private void disableForegroundDispatchSystem() {
+        nfcAdapter.disableForegroundDispatch(this);
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (intent.getAction().equals(NfcAdapter.ACTION_TAG_DISCOVERED)) {
+            ResultActivity.this.runOnUiThread(new Runnable() {
+                public void run() {
+                    showTagReadImage(true);
+
+                }
+            });
+
+            if (intent.hasExtra(NfcAdapter.EXTRA_TAG)) {
+                Parcelable[] parcelables = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+
+                if (parcelables != null && parcelables.length > 0) {
+                    final String id = readTextFromMessage((NdefMessage) parcelables[0]);
+                    if (id != null) {
+
+                        OkHttpClient client = new OkHttpClient();
+
+                        String url = "http://betrack.herokuapp.com/barrels/" + id + ".json";
+
+                        Request request = new Request.Builder()
+                                .url(url)
+                                .build();
+
+                        client.newCall(request).enqueue(new Callback() {
+                            @Override
+                            public void onFailure(Request request, IOException e) {
+                                e.printStackTrace();
+
+                            }
+
+                            @Override
+                            public void onResponse(Response response) throws IOException {
+                                if (response.code() >= 400 && response.code() <= 500) {
+                                    Intent i = new Intent(ResultActivity.this, ResultActivity.class);
+                                    AppPreferences.instance(getApplication()).saveBarrelFound(false);
+                                    startActivity(i);
+                                    Log.e("Response code: ", response.code() + " " + response.body().toString());
+                                    throw new IOException("Unexpected code " + response);
+
+                                } else {
+                                    String jsonData = response.body().string();
+                                    AppPreferences.instance(getApplication()).saveBarrelInfo(jsonData);
+                                    Intent i = new Intent(ResultActivity.this, ResultActivity.class);
+                                    AppPreferences.instance(getApplication()).saveBarrelFound(true);
+                                    i.putExtra("BarrelId", Integer.parseInt(id));
+                                    startActivity(i);
+
+                                }
+                            }
+
+                        });
+
+                    }
+                } else {
+                    Toast.makeText(this, "No se encontró ningún dato. Inténtelo nuevamente", Toast.LENGTH_SHORT).show();
+                    showTagReadImage(false);
+                }
+
+
+            }
+
+        }
+    }
+
+    private void showTagReadImage(boolean show) {
+        RelativeLayout resultLayout = (RelativeLayout) findViewById(R.id.resultActivityLayout);
+        RelativeLayout searchingDataLayout = (RelativeLayout) findViewById(R.id.searchingDataLayout);
+
+        assert searchingDataLayout != null;
+        searchingDataLayout.setVisibility(show? View.VISIBLE: View.GONE);
+        assert resultLayout != null;
+        resultLayout.setVisibility(show? View.GONE: View.VISIBLE);
 
     }
 
@@ -159,6 +284,14 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
 
     }
 
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    @Override
+    public void onBackPressed() {
+        navigateUpTo(getParentActivityIntent());
+        super.onBackPressed();
+
+    }
 
     private boolean postNewStatus() {
         final boolean[] succes = {false};
@@ -317,6 +450,36 @@ public class ResultActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
+
+    private String readTextFromMessage(NdefMessage ndefMessage) {
+
+        NdefRecord[] ndefRecords = ndefMessage.getRecords();
+
+        if (ndefRecords != null && ndefRecords.length > 0) {
+
+            NdefRecord ndefRecord = ndefRecords[0];
+
+            String tagContent = getTextFromNdefRecord(ndefRecord);
+
+            return tagContent;
+
+        }
+        return null;
+    }
+
+    public String getTextFromNdefRecord(NdefRecord ndefRecord) {
+        String tagContent = null;
+        try {
+            byte[] payload = ndefRecord.getPayload();
+            String textEncoding = ((payload[0] & 128) == 0) ? "UTF-8" : "UTF-16";
+            int languageSize = payload[0] & 0063;
+            tagContent = new String(payload, languageSize + 1,
+                    payload.length - languageSize - 1, textEncoding);
+        } catch (UnsupportedEncodingException e) {
+            Log.e("getTextFromNdefRecord", e.getMessage(), e);
+        }
+        return tagContent;
     }
 
     @Override

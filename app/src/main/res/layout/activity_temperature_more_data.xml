@@ -7,6 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="#fff"
     tools:context="cranio.betrack.activities.TemperatureMoreDataActivity">
 
     <ScrollView
@@ -17,88 +18,99 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <ImageView
-            android:id="@+id/goldenAlePic"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20sp"
-            android:src="@drawable/beertype" />
+            <ImageView
+                android:id="@+id/goldenAlePic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20sp"
+                android:src="@drawable/beertype" />
 
-        <TextView
-            android:id="@+id/beerTypeTemperatureMoreData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/goldenAlePic"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10sp"
-            android:text="Patagonia Golden Ale"
-            android:textSize="20sp" />
+            <TextView
+                android:id="@+id/beerTypeTemperatureMoreData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/goldenAlePic"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10sp"
+                android:text="Patagonia Golden Ale"
+                android:textSize="20sp" />
 
 
-        <TextView
-            android:id="@+id/beerTemperatureMoreData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/beerTypeTemperatureMoreData"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20sp"
-            android:text="12º"
-            android:textSize="35sp" />
+            <TextView
+                android:id="@+id/beerTemperatureMoreData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/beerTypeTemperatureMoreData"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="20sp"
+                android:text="12º"
+                android:textSize="35sp" />
 
             <ImageView
+                android:id="@+id/temperatureCircle"
                 android:layout_width="50sp"
                 android:layout_height="50sp"
-                android:src="@drawable/ic_temperature_yellow"
-                android:id="@+id/temperatureCircle"
                 android:layout_alignTop="@+id/beerTemperatureMoreData"
                 android:layout_toLeftOf="@+id/goldenAlePic"
-                android:layout_toStartOf="@+id/goldenAlePic" />
+                android:layout_toStartOf="@+id/goldenAlePic"
+                android:src="@drawable/ic_temperature_yellow" />
 
-        <TextView
-            android:id="@+id/updateTVMoreData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/beerTemperatureMoreData"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="5sp"
-            android:text="Actualizado:" />
+            <TextView
+                android:id="@+id/updateTVMoreData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/beerTemperatureMoreData"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5sp"
+                android:text="Actualizado:" />
 
-        <TextView
-            android:id="@+id/lastUpdateTemperatureMoreData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/updateTVMoreData"
-            android:layout_centerHorizontal="true"
-            android:text="22/10/2016 - 16:06 hs." />
+            <TextView
+                android:id="@+id/lastUpdateTemperatureMoreData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/updateTVMoreData"
+                android:layout_centerHorizontal="true"
+                android:text="22/10/2016 - 16:06 hs." />
 
-        <lecho.lib.hellocharts.view.LineChartView
-            android:id="@+id/chart"
-            android:layout_width="wrap_content"
-            android:layout_height="300sp"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_below="@+id/lastUpdateTemperatureMoreData"
-            android:layout_marginTop="10sp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_below="@+id/lastUpdateTemperatureMoreData"
+                android:layout_height="wrap_content"
+                android:background="#949494"
+                android:layout_marginTop="10sp"
+                android:id="@+id/chart">
 
-        <TextView
-            android:id="@+id/lotNumberTemperatureData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/chart"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="10sp"
-            android:text="Lote: 5"
-            android:textSize="17sp" />
+                <lecho.lib.hellocharts.view.LineChartView
+                    android:id="@+id/chart1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="350sp"
+                    android:layout_marginTop="2sp"
+                    android:layout_marginLeft="2sp"
+                    android:layout_marginRight="2sp"
+                    android:layout_marginBottom="2sp"
+                    android:background="#fff"
+                    android:padding="25sp" />
+            </LinearLayout>
 
-        <TextView
-            android:id="@+id/barrelnumberTemperatureData"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/lotNumberTemperatureData"
-            android:layout_centerHorizontal="true"
-            android:text="Barril: 4" />
+            <TextView
+                android:id="@+id/lotNumberTemperatureData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/chart"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10sp"
+                android:text="Lote: 5"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/barrelnumberTemperatureData"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/lotNumberTemperatureData"
+                android:layout_centerHorizontal="true"
+                android:text="Barril: 4" />
 
         </RelativeLayout>
     </ScrollView>
